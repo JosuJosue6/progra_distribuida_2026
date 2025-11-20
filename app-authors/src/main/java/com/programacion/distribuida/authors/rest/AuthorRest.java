@@ -7,6 +7,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 
@@ -19,6 +22,10 @@ public class AuthorRest {
 
     @Inject
     AuthorRepository authorRepository;
+
+    @Inject // es una extencion del CDI
+    @ConfigProperty(name = "quarkus.http.port") //saca el archivo de configuracion
+    Integer httpPort;
 
     @GET
     public List<Author> findAll() {
@@ -37,9 +44,48 @@ public class AuthorRest {
         }*/
 
         return authorRepository.findByIdOptional(id)
+                .map(obj -> {
+                    obj.setName( obj.getName() + " "+ httpPort);
+                    return obj;
+                })
                 .map(Response::ok)
                 .orElse(Response.status(Response.Status.NOT_FOUND))
                 .build();
+
+
+    }
+
+    @GET
+    @Path("/find/{isbn}")
+    public List<Author> findByBook(@PathParam("isbn") String isbn) {
+
+       return authorRepository.findByBook(isbn).stream()
+                .map(obj -> {
+                    var newName = String.format("%s (%s)", obj.getName(), httpPort);
+                    return obj;
+                })
+                .toList();
+
+    }
+
+    @GET
+    @Path("/test")
+    public String test() {
+        Config config = ConfigProvider.getConfig();
+    //las funentes de config que esten registradas
+        config.getConfigSources()
+                .forEach(obj -> {
+                    System.out.printf("%d -> %s\n", obj.getOrdinal(), obj.getName());
+                });
+
+        //-- recuperar valor de configuracion
+        String url = config.getValue("quarkus.datasource.jdbc.url", String.class);
+        Integer port =  config.getValue("quarkus.http.port", Integer.class);
+
+        System.out.println("**********************************************");
+        System.out.println(url);
+        System.out.println(port);
+        return  "Ok";
     }
 
 }
