@@ -15,5 +15,5 @@ public interface AuthorRestClient {
 
     @GET
     @Path("/find/{isbn}")
-    List<AuthorDto> findById(@PathParam("isbn") String isbn);
+    List<AuthorDto> findByBook(@PathParam("isbn") String isbn);
 }

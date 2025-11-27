@@ -9,6 +9,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 val quarkusVersion = "3.29.3"

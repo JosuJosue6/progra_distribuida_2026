@@ -7,6 +7,7 @@ import com.programacion.distribuida.books.servicios.MapperService;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import java.util.List;
 
 @Path("/books")
+@Transactional
 @ApplicationScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,30 +29,39 @@ public class BookRest {
     @Inject
     ModelMapper mapper;
 
+    AuthorRestClient client;
+
     @PostConstruct
-    void
+    void init()
+    {
+        var authorsServer = "http://localhost:8070";
+        client = RestClientBuilder.newBuilder()
+                .baseUri(authorsServer)
+                .build(AuthorRestClient.class);
+    }
 
     @GET
     @Path("/{isbn}")
     public Response findByIsbn(@PathParam("isbn") String isbn)
     {
 
-        var authorServer ="http://localhost:8070";
+        /*var authorServer ="http://localhost:8070";
 
         var client = RestClientBuilder.newBuilder()
                 .baseUri(authorServer)
-                .build(AuthorRestClient.class);
-        /*return bookRepository.findByIdOptional(isbn)
+                .build(AuthorRestClient.class);*/
+        return bookRepository.findByIdOptional(isbn)
                 .map(book -> {
+                    var authors = client.findByBook(isbn);
                     var dto = new BookDto();
                     mapper.map(book, dto);
                     return Response.ok(dto).build();
                 })
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
-*/
-        var obj = bookRepository.findByIdOptional(isbn);
 
-        MapperService mapper;
+        /*var obj = bookRepository.findByIdOptional(isbn);
+
+
 
         if(obj.isEmpty())
         {
@@ -71,20 +82,21 @@ public class BookRest {
                 List.of()
         );
 
-        return Response.ok(ret).build();
+        return Response.ok(ret).build();*/
     }
 
-   /* @GET
+    @GET
     public List<BookDto> findAll(){
-        bookRepository.streamAll()
+        return bookRepository.streamAll()
                 .map(book ->{
                     var dto = new BookDto();
-                    //mapper.map(book,dto);
+                    mapper.map(book,dto);
                     return dto;
                 })
                 .map(book -> {
-                    book.setAuthors(List.of());
+                    var authors = client.findByBook(book.getIsbn());
+                    book.setAuthors(authors);
                     return book;
                 }).toList();
-    }*/
+    }
 }
