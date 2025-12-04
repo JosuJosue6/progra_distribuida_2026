@@ -39,6 +39,10 @@ dependencies {
     //-- Cliente Rest
     implementation("io.quarkus:quarkus-rest-client")
     implementation("io.quarkus:quarkus-rest-client-jsonb")
+
+    //service discovery
+    implementation("io.quarkus:quarkus-smallrye-stork")
+    implementation("io.smallrye.stork:stork-service-discovery-static-list:2.6.3")
 }
 
 tasks.test {
