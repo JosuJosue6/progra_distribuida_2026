@@ -62,6 +62,7 @@ public class AuthorRest {
        return authorRepository.findByBook(isbn).stream()
                 .map(obj -> {
                     var newName = String.format("%s (%s)", obj.getName(), httpPort);
+                    obj.setName(newName);
                     return obj;
                 })
                 .toList();
