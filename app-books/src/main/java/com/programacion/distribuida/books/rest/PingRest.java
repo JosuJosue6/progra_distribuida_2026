@@ -8,7 +8,7 @@ public class PingRest {
 
     @GET
     public  String ping() {
-        return "pong ************";
+        return "pong ******";
     }
 }
 
