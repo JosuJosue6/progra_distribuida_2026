@@ -45,18 +45,18 @@ public class BooksLifecycle {
             serviceId = UUID.randomUUID().toString();
             var ipAddress = InetAddress.getLocalHost().getHostAddress();
 
-            /*var urlCheck = String.format("http://%s:%d/ping", ipAddress, appPort);
+            var urlCheck = String.format("http://%s:%d/ping", ipAddress, appPort);
             var checkOptions = new CheckOptions()
                     .setHttp(urlCheck)
                     .setInterval("10s")
-                    .setDeregisterAfter("10s");*/
+                    .setDeregisterAfter("10s");
 
             ServiceOptions serviceOptions = new ServiceOptions()
                     .setName("app-books")
                     .setId(serviceId)
                     .setAddress(ipAddress)
-                    .setPort(appPort);
-                    //.setCheckOptions(checkOptions);
+                    .setPort(appPort)
+                    .setCheckOptions(checkOptions);
 
             consuClient.registerService(serviceOptions)
                     .onSuccess(it->{
