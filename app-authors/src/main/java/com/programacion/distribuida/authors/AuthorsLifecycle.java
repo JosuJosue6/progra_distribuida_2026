@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.net.InetAddress;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -51,12 +52,20 @@ public class AuthorsLifecycle {
                     .setInterval("10s")
                     .setDeregisterAfter("10s");
 
+            var tags = List.of(
+                    "traefik.enable=true",
+                    "traefik.http.routers.authors.rule=PathPrefix(`/app-authors`)",
+                    "traefik.http.middlewares.authors-stripprefix.stripPrefix.prefixes=/app-authors",
+                    "traefik.http.routers.authors.middlewares=authors-stripprefix"
+            );
+
             ServiceOptions serviceOptions = new ServiceOptions()
                     .setName("app-authors")
                     .setId(serviceId)
                     .setAddress(ipAddress)
                     .setPort(appPort)
-                    .setCheckOptions(checkOptions);
+                    .setCheckOptions(checkOptions)
+                    .setTags(tags);
 
             consuClient.registerService(serviceOptions)
                     .onSuccess(it->{
