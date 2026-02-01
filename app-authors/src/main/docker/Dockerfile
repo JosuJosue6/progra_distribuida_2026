@@ -1,0 +1,18 @@
+#
+# docker build -f src/main/docker/Dockerfile -t app-authors .
+#
+
+FROM docker.io/eclipse-temurin:21.0.9_10-jre-alpine-3.23
+
+ENV LANGUAGE='en_US:en'
+
+RUN mkdir /app
+WORKDIR /app
+
+COPY build/quarkus-app/lib/ ./lib
+COPY build/quarkus-app/quarkus/ ./quarkus
+COPY build/quarkus-app/app/ ./app
+COPY build/quarkus-app/quarkus-run.jar app.jar
+
+CMD ["java", "-jar", "app.jar"]
+

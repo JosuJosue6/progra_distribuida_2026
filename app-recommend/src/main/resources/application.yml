@@ -1,0 +1,10 @@
+server:
+  port: 9090
+spring:
+  ai:
+    openai:
+      api-key: xxyyzz
+      base-url: https://localhost:8080
+      chat:
+        options:
+          model: llama-3.2-1b-instruct-q8_0.gguf
