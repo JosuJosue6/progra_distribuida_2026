@@ -33,10 +33,21 @@ dependencies {
     implementation("io.quarkus:quarkus-hibernate-orm-panache")
     implementation("io.quarkus:quarkus-jdbc-postgresql")
 
+    //Flyway
+    implementation("io.quarkus:quarkus-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql")
+
     //Service Discovery
     implementation("io.quarkus:quarkus-smallrye-stork")
     implementation("io.smallrye.stork:stork-service-discovery-consul")
     implementation("io.smallrye.reactive:smallrye-mutiny-vertx-consul-client")
+
+    //DOcker
+    implementation("io.quarkus:quarkus-container-image-docker")
+
+    //telemetria
+    implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
+    implementation("io.quarkus:quarkus-jackson")
 }
 
 tasks.test {

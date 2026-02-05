@@ -5,6 +5,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import java.util.List;
@@ -17,5 +19,14 @@ public interface AuthorRestClient {
 
     @GET
     @Path("/find/{isbn}")
+    @Retry(maxRetries = 4, delay = 100)
+    @Fallback(fallbackMethod = "findByBookFallback")
     List<AuthorDto> findByBook(@PathParam("isbn") String isbn);
+
+    default List<AuthorDto> findByBookFallback(@PathParam("isbn") String isbn) {
+        var dto = new AuthorDto();
+        dto.setId(0);
+        dto.setName("Unknown Author");
+        return List.of(dto);
+    }
 }

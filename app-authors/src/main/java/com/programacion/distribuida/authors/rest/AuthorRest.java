@@ -12,6 +12,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -19,6 +20,8 @@ import java.util.List;
 @ApplicationScoped
 @Path("/authors")
 public class AuthorRest {
+
+    AtomicInteger index = new AtomicInteger(1);
 
     @Inject
     AuthorRepository authorRepository;
@@ -59,6 +62,12 @@ public class AuthorRest {
     @Path("/find/{isbn}")
     public List<Author> findByBook(@PathParam("isbn") String isbn) {
 
+        int valor = index.getAndIncrement();
+        if(valor%5!=0){
+            String msg = String.format("Intento %d generando error", valor);
+            System.out.println("authors-service ********************: " + msg);
+            throw new RuntimeException(msg);
+        }
        return authorRepository.findByBook(isbn).stream()
                 .map(obj -> {
                     var newName = String.format("%s (%s)", obj.getName(), httpPort);

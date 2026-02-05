@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  #http://authors:8080/q/metrics
+  - job_name: 'authors-app'
+    scrape_interval: 10s
+    metrics_path: '/q/metrics'
+    static_configs:
+      - targets: ['authors:8080']
+
+  - job_name: 'proxy'
+    static_configs:
+      - targets: [ 'proxy:8082' ]
+
+  - job_name: postgres
+    static_configs:
+      - targets: [ 'postgres-exporter:9187' ]

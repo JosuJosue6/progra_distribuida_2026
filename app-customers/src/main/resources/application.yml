@@ -1,5 +1,19 @@
+server:
+  port: 8060
 spring:
+  application:
+    name: app-customers
   datasource:
-    url: jdbc:postgresql://localhost:5432/book_pd
+    url: jdbc:postgresql://localhost:5432/books-db
     username: postgres
-
+    password: 1234
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        tags:
+          - traefik.enable=true
+          - traefik.http.routers.customers.rule=PathPrefix(`/app-customers`)
+          - traefik.http.middlewares.customers-stripprefix.stripPrefix.prefixes=/app-customers
+          - traefik.http.routers.customers.middlewares=customers-stripprefix

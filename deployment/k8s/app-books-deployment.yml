@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-books
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-books
+  template:
+    metadata:
+      labels:
+        app: app-books
+    spec:
+      containers:
+        - name: app-books
+          image: josujosue/app-books:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: jdbc:postgresql://postgres:5432/books_db
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: postgres
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              value: postgres
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+            - name: CONSUL_HOST
+              value: consul
+            - name: CONSUL_PORT
+              value: "8500"
+            - name: QUARKUS_FLYWAY_ACTIVE
+              value: "true"
+            - name: QUARKUS_FLYWAY_MIGRATE_AT_START  # Agrega esta línea
+              value: "true"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-books-service
+spec:
+  type: ClusterIP
+  selector:
+    app: app-books
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: app-books-hpa
+spec:
+  minReplicas: 1
+  maxReplicas: 10
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-books
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 50
+

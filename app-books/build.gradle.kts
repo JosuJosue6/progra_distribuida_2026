@@ -44,6 +44,12 @@ dependencies {
     //implementation("io.smallrye.stork:stork-service-discovery-static-list")
     implementation("io.smallrye.stork:stork-service-discovery-consul")
     implementation("io.smallrye.reactive:smallrye-mutiny-vertx-consul-client")
+
+    //DOcker
+    implementation("io.quarkus:quarkus-container-image-docker")
+
+    //Resiliencia
+    implementation("io.quarkus:quarkus-smallrye-fault-tolerance")
 }
 
 tasks.test {
