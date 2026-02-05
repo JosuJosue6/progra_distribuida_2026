@@ -27,7 +27,12 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
+    //consul
     implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
+    //implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
+
+    // Spring Actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
 }
 dependencyManagement {

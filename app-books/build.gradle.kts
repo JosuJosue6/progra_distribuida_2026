@@ -50,8 +50,14 @@ dependencies {
 
     //Resiliencia
     implementation("io.quarkus:quarkus-smallrye-fault-tolerance")
+
+    //Microprofile Health
+    implementation("io.quarkus:quarkus-smallrye-health")
+
+    implementation("io.quarkus:quarkus-kubernetes")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
 }

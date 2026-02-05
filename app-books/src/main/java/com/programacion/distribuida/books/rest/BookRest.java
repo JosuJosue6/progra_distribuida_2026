@@ -1,9 +1,11 @@
 package com.programacion.distribuida.books.rest;
 
 import com.programacion.distribuida.books.clients.AuthorRestClient;
+import com.programacion.distribuida.books.clients.CustomersRestClient;
 import com.programacion.distribuida.books.dto.BookDto;
 import com.programacion.distribuida.books.repo.BookRepository;
 import com.programacion.distribuida.books.servicios.MapperService;
+import com.programacion.distribuida.books.servicios.ServicioBooks;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.stork.Stork;
 import io.smallrye.stork.api.Service;
@@ -40,111 +42,126 @@ public class BookRest {
     @RestClient
     AuthorRestClient client;
 
-    AtomicInteger index = new AtomicInteger();
+    @Inject
+    @RestClient
+    CustomersRestClient customersRestClient;
 
-    /*@PostConstruct
-    void init()
-    {
-        var authorsServer = "http://localhost:8070";
-        client = RestClientBuilder.newBuilder()
-                .baseUri(authorsServer)
-                .build(AuthorRestClient.class);
-    }*/
+    @Inject
+    ServicioBooks servicioBooks;
+
+    AtomicInteger index = new AtomicInteger(0);
+
+//    @PostConstruct
+//    void init() {
+//        var authorsServer = "http://localhost:8070";
+//
+//        client = RestClientBuilder.newBuilder()
+//                .baseUri(authorsServer)
+//                .build(AuthorRestClient.class);
+//    }
 
     @GET
     @Path("/{isbn}")
-    public Response findByIsbn(@PathParam("isbn") String isbn)
-    {
+    public Response findByIsbn(@PathParam("isbn") String isbn) {
 
-        /*var authorServer ="http://localhost:8070";
-
-        var client = RestClientBuilder.newBuilder()
-                .baseUri(authorServer)
-                .build(AuthorRestClient.class);*/
         return bookRepository.findByIdOptional(isbn)
                 .map(book -> {
-                    //System.out.println("Buscando el book: " + isbn);
+                    System.out.println("Buscando authores para el libro isbn=" + isbn);
                     var authors = client.findByBook(isbn);
                     var dto = new BookDto();
                     mapper.map(book, dto);
+                    dto.setAuthors(authors);
                     return Response.ok(dto).build();
+
                 })
                 .orElse(Response.status(Response.Status.NOT_FOUND).build());
 
-        /*var obj = bookRepository.findByIdOptional(isbn);
-
-
-
-        if(obj.isEmpty())
-        {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-
-        BookDto ret = new BookDto();
-       // mapper.map(obj.get(),ret);
-        ret.setIsbn(obj.get().getIsbn());
-        ret.setTitle(obj.get().getTitle());
-        ret.setPrice(obj.get().getPrice());
-        if(obj.get().getInventory() != null){
-            ret.setInventorySold(obj.get().getInventory().getSold());
-            ret.setInventorySupplied(obj.get().getInventory().getSupplied());
-        }
-        ret.setAuthors(
-                List.of()
-        );
-
-        return Response.ok(ret).build();*/
+//        var obj = bookRepository.findByIdOptional(isbn);
+//
+//        if(obj.isEmpty()) {
+//            return Response.status(Response.Status.NOT_FOUND).build();
+//        }
+//
+//        BookDto ret = new BookDto();
+//
+//        mapper.map(obj.get(), ret);
+//
+//        ret.setAuthors(
+//                List.of()
+//        );
+//
+//        return Response.ok(ret)
+//                .build();
     }
 
     @GET
-    public List<BookDto> findAll(){
+    public List<BookDto> findAll() {
         return bookRepository.streamAll()
-                .map(book ->{
+                .map(book -> {
                     var dto = new BookDto();
-                    mapper.map(book,dto);
+                    mapper.map(book, dto);
                     return dto;
                 })
                 .map(book -> {
                     var authors = client.findByBook(book.getIsbn());
                     book.setAuthors(authors);
                     return book;
-                }).toList();
+                })
+                .toList();
     }
+
+    @PUT
+    @Path("/{isbn}")
+    public Response update(@PathParam("isbn") String isbn, BookDto book) {
+        servicioBooks.updateBook(isbn, book);
+        return Response.ok().build();
+    }
+
     @GET
     @Path("/test")
-    public Response test(){
+    public Response test() {
 
+//        Stork stork = Stork.getInstance();
 
-        Stork stork = Stork.getInstance();
-       //----------imprimir lo que esta en el registro
-       Map<String, Service> services = stork.getServices();
-       services.entrySet()
-                .stream()
-                .forEach(it ->{
-                    String key = it.getKey();
-                    Service service = it.getValue();
+        //---------------- imprimir el contenido del registro
+//        Map<String, Service> services = stork.getServices();
+//
+//        services.entrySet()
+//                .stream()
+//                .forEach(it->{
+//                    String key = it.getKey();
+//                    Service service = it.getValue();
+//
+//                    System.out.println("--grupo: " + key);
+//
+//                    Multi<ServiceInstance> instancias = service.getInstances()
+//                            .onItem()
+//                            .transformToMulti(items-> Multi.createFrom().iterable(items));
+//
+//
+//                    instancias.subscribe()
+//                            .with( item->{
+//                                System.out.println( "  " + item.getHost() + ":" + item.getPort() );
+//                            });
+//                });
 
-                    System.out.println("--grupo: "+key);
+        //-------buscar un servicio, seleccionar instancia, balancear
+//        Service service = stork.getService("authors-api");
+//
+//        List<ServiceInstance> instancias = service.getInstances().await().indefinitely();
+//
+//        int curIndex = index.getAndIncrement() % instancias.size();
+//
+//        var instancia = instancias.get(curIndex);
+//
+//        System.out.println( "Invocando authors-api: " + instancia.getHost() + ":" + instancia.getPort());
 
-
-                    Multi<ServiceInstance> instancias = service.getInstances()
-                            .onItem()
-                            .transformToMulti(items -> Multi.createFrom().iterable(items));
-                    instancias.subscribe()
-                            .with(item ->{
-                                System.out.println("    "+item.getHost()+"  "+item.getPort());
-                            });
-                });
-        //---------buscar un servicio, seleccionar instancia, balancear
-        Service service = stork.getService("authors-api");
-        List<ServiceInstance> instancias = service.getInstances().await().indefinitely();
-
-        int curIndex= index.getAndIncrement() % instancias.size();
-        var instancia = instancias.get(curIndex);
-
-        System.out.println("Invocando authros-api: "+instancia.getHost()+":"+instancia.getPort());
 
         return Response.ok("ok").build();
+    }
+    @GET
+    @Path("/test2")
+    public List<Object> test2() {
+        return customersRestClient.findAll();
     }
 }

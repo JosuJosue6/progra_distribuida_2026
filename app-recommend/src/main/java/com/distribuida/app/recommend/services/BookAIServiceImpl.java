@@ -18,16 +18,26 @@ public class BookAIServiceImpl implements BookAIServices{
 
     @Override
     public List<BookRecDto> recommendar(String title) {
-        String promptText = "Recomienda 2 libros para alguien que le interesa {title} " ;
-
-        var ret = chatClient.prompt()
-                .user(userSpec ->userSpec.text(promptText)
-                        .param("title", title)
-                )
+        String prompText ="""
+            Recomienda 2 libros para alguien que le interesa {titulo}.
+            Devuelve exclusivamente un JSON con el siguiente formato:
+            [
+                \\{
+                   "titulo": "..",
+                   "isbn": "...",
+                   "editorial": "...",
+                   "descripcion": "..."
+                }
+            ]
+            No agregues texto explicativo ni texto adicional.
+            """;
+        ;
+        return chatClient.prompt()
+                .user(promptUserSpec -> promptUserSpec
+                        .text(prompText)
+                        .param("titulo", title))
                 .call()
                 .entity(new ParameterizedTypeReference<List<BookRecDto>>() {
                 });
-
-        return ret;
     }
 }

@@ -26,10 +26,16 @@ services:
     command: |
       --api.insecure=true
       --api.dashboard=true
+      --entryPoints.http.address=":80"
       --providers.consulcatalog
       --providers.consulcatalog.refreshinterval=5s
       --providers.consulcatalog.exposedByDefault=false
       --providers.consulcatalog.endpoint.address=consul:8500
+      --entryPoints.metrics.address=":8082"
+      --entryPoints.http.address=":80"
+      --metrics.prometheus=true
+      --metrics.prometheus.entryPoint=metrics
+
     ports:
       - 8888:8080
       - 8080:80
@@ -47,8 +53,8 @@ services:
       CONSUL_PORT: 8500
     expose:
       - 8080
-    #    ports:
-    #      - 8888:8080
+    ports:
+        - 8889:8080
     deploy:
       replicas: 1
     depends_on:
@@ -72,6 +78,7 @@ services:
     depends_on:
       - dbserver
       - authors
+      -
   customers:
     image: josujosue/app-customers
     environment:
@@ -90,28 +97,29 @@ services:
     depends_on:
       - dbserver
       - authors
+      -
   prometheus:
     image: prom/prometheus:latest
     volumes:
       - ./configs:/etc/prometheus
     ports:
-      - "9090:9090"
+      - 9090:9090
     expose:
       - 9090
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana-oss:latest
     ports:
-      - "3000:3000"
+      - 3000:3000
     expose:
       - 3000
 #    depends_on:
 #      - prometheus
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter
-    environment:
-        DATA_SOURCE_URI: "dbserver:5432/books-db?sslmode=disable"
-        DATA_SOURCE_USER: postgres
-        DATA_SOURCE_PASSWORD: 1234
-    ports:
-      - 9187
+#  postgres-exporter:
+#    image: prometheuscommunity/postgres-exporter
+#    environment:
+#        DATA_SOURCE_URI: "dbserver:5432/books-db?sslmode=disable"
+#        DATA_SOURCE_USER: postgres
+#        DATA_SOURCE_PASSWORD: 1234
+#    ports:
+#      - 9187

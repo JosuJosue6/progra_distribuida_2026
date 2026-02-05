@@ -14,12 +14,12 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/authors")
-@RegisterRestClient(configKey = "AuthorRestClient")
+@RegisterRestClient(configKey = "stork://authors-api")
 public interface AuthorRestClient {
 
     @GET
     @Path("/find/{isbn}")
-    @Retry(maxRetries = 4, delay = 100)
+    @Retry(maxRetries = 2, delay = 100)
     @Fallback(fallbackMethod = "findByBookFallback")
     List<AuthorDto> findByBook(@PathParam("isbn") String isbn);
 

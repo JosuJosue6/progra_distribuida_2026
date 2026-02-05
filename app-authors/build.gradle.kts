@@ -48,8 +48,12 @@ dependencies {
     //telemetria
     implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
     implementation("io.quarkus:quarkus-jackson")
+
+    //Microprofile Health
+    implementation("io.quarkus:quarkus-smallrye-health")
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+    options.compilerArgs.add("-parameters")
 }
